@@ -89,14 +89,18 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
     }
 
     private void injectProperties(Object test) throws IllegalArgumentException, IllegalAccessException {
-        for (Field field : test.getClass().getDeclaredFields()) {
-            PropertyValue property = field.getAnnotation(PropertyValue.class);
-            if (property != null) {
-                Object value = resolvePropertyValue(property.value());
-                field.setAccessible(true);
-                field.set(test, value);
+        Class<?> clazz = test.getClass();
+        do {
+            for (Field field : clazz.getDeclaredFields()) {
+                PropertyValue property = field.getAnnotation(PropertyValue.class);
+                if (property != null) {
+                    Object value = resolvePropertyValue(property.value());
+                    field.setAccessible(true);
+                    field.set(test, value);
+                }
             }
-        }
+            clazz = clazz.getSuperclass();
+        } while (!Object.class.equals(clazz));
     }
 
     /**
@@ -123,13 +127,17 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
      *  of the properties files was broken
      */
     private Properties loadProperties(Object test) throws IOException {
-        // check for resource bundles
-        ResourceBundle resource = test.getClass().getAnnotation(ResourceBundle.class);
-        if (resource != null) {
-            for (String bundle : resource.value()) {
-                addResourceBundle(bundle);
+        Class<?> clazz = test.getClass();
+        do {
+            // check for resource bundles
+            ResourceBundle resource = clazz.getAnnotation(ResourceBundle.class);
+            if (resource != null) {
+                for (String bundle : resource.value()) {
+                    addResourceBundle(bundle);
+                }
             }
-        }
+            clazz = clazz.getSuperclass();
+        } while (!Object.class.equals(clazz));
         return properties;
     }
 
