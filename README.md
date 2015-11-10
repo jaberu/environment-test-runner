@@ -28,14 +28,16 @@ The values can be injected from different sources.
 One source us the classic java resource bundle. Therefore the @ResourceBundle annotation can be used at class level.
 Those bundles can be created for different environments. For the example above the test looks in classpath for a file named ``/test.properties``.
 If the test is running in a specific environment, also existence of ``/<environment>/test.properties`` checked. If such a file exists the properties from ``/test.properties`` are overriddn by those from ``/<environment>/
-System Properties
+###System Properties
 A second way for applying settings is the system properties from command line directly. This is useful for integrating the tests in jenkins for example. By this mechanism also the environment is given.
 
 Take care, if you're using grade, that way is not working directly. By default gradle is not applying the jvm system properties to the gradle vm.
 If you start your tests with gradle you have to extent your ``build.gradle`` by something like this:
-Gradle Konfiguration
+###Gradle Konfiguration
+```gradle
 task unitTest( type: Test ) {
   systemProperties['publication'] = System.getProperty("publication")
   systemProperties['stage'] = System.getProperty("stage")
 }
+```
 In the example only two properties are copied into the gradle vm. If you want more, you need to add them.
