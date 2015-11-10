@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Test to verify that the injection if properties into test classes works.
- *  *
+ *
  * Created by aherr on 09.11.2015.
  * @see EnvironmentTestRunner
  */
