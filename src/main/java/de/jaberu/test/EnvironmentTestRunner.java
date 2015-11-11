@@ -95,11 +95,40 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
                 if (property != null) {
                     Object value = resolvePropertyValue(property.value());
                     field.setAccessible(true);
-                    field.set(test, value);
+                    Object typeSafeValue = convertValue(field, value);
+                    field.set(test, typeSafeValue);
                 }
             }
             clazz = clazz.getSuperclass();
         } while (!Object.class.equals(clazz));
+    }
+
+    /**
+     * Since we read property files, we will always get strings. However to allow other types
+     * to inject we check the field type here and try a conversion, at least for the basic
+     * java types.
+     *
+     * @param field field we want to inject into
+     * @param value the value (propably a string)
+     * @return converted value matching the field type
+     */
+    private Object convertValue(Field field, Object value) {
+        if (field.getType() == Integer.class || field.getType() == int.class) {
+            return Integer.valueOf(value.toString());
+        }
+        if (field.getType() == Double.class || field.getType() == double.class) {
+            return Double.valueOf(value.toString());
+        }
+        if (field.getType() == Float.class || field.getType() == float.class) {
+            return Float.valueOf(value.toString());
+        }
+        if (field.getType() == Boolean.class || field.getType() == boolean.class) {
+            return Boolean.parseBoolean(value.toString());
+        }
+        if (field.getType() == Long.class || field.getType() == long.class) {
+            return Long.valueOf(value.toString());
+        }
+        return value;
     }
 
     /**
