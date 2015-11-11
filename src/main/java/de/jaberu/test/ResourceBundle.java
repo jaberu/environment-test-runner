@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 public @interface ResourceBundle {
 
     /**
-     * @return the bundle name (without properties suffix!)
+     * @return the bundle name (without .properties suffix!)
      */
     String[] value();
 }
