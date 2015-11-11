@@ -1,6 +1,5 @@
 package de.jaberu.test;
 
-import org.junit.*;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -89,7 +88,7 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
     }
 
     private void injectProperties(Object test) throws IllegalArgumentException, IllegalAccessException {
-        Class<?> clazz = test.getClass();
+        Class clazz = test.getClass();
         do {
             for (Field field : clazz.getDeclaredFields()) {
                 PropertyValue property = field.getAnnotation(PropertyValue.class);
@@ -133,7 +132,7 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
             ResourceBundle resource = clazz.getAnnotation(ResourceBundle.class);
             if (resource != null) {
                 for (String bundle : resource.value()) {
-                    addResourceBundle(bundle);
+                    addResourceBundle(clazz, bundle);
                 }
             }
             clazz = clazz.getSuperclass();
@@ -145,28 +144,47 @@ public class EnvironmentTestRunner extends BlockJUnit4ClassRunner {
      * Here we add a bundle by first loading the base bundle. Afterwards we check if an environment-specific bundle
      * exists. If existing we override the already loaded values from the base bundle.
      *
+     * Since we assume that the resource is accessible by the same classloader like the test class, we use the
+     * test class for loading the resource.
+     *
+     * @param loader the test class to load the resource with
      * @param resource the bundles name
      * @return local properties instance
      * @throws IOException from {@link Properties#load(InputStream)}
      */
-    private Properties addResourceBundle(String resource) throws IOException {
+    private Properties addResourceBundle(Class<?> loader, String resource) throws IOException {
         // loads the base resource
         StringBuilder builder = new StringBuilder(SLASH);
         builder.append(resource);
         builder.append(PROPERTIES);
-        properties.load(getClass().getResourceAsStream(builder.toString()));
+        properties.load(loader.getResourceAsStream(builder.toString()));
         // check environment specific overrides
         String env = System.getProperty(Environment.STAGE);
         if (env != null) {
             builder = new StringBuilder(SLASH);
-            builder.append(env);
+            builder.append(env.toLowerCase());
             builder.append(SLASH);
             builder.append(resource);
             builder.append(PROPERTIES);
-            InputStream environmentSpecific = getClass().getResourceAsStream(builder.toString());
-            if (environmentSpecific != null) {
+            InputStream publicationSpecific = loader.getResourceAsStream(builder.toString());
+            if (publicationSpecific != null) {
                 // might be null if nothing specific for the environment exists
-                properties.load(environmentSpecific);
+                properties.load(publicationSpecific);
+            }
+            String publication = System.getProperty(Environment.PUBLICATION);
+            if (publication != null) {
+                builder = new StringBuilder(SLASH);
+                builder.append(env.toLowerCase());
+                builder.append(SLASH);
+                builder.append(publication.toLowerCase());
+                builder.append(SLASH);
+                builder.append(resource);
+                builder.append(PROPERTIES);
+                InputStream stageSpecific = loader.getResourceAsStream(builder.toString());
+                if (stageSpecific != null) {
+                    // might be null if nothing specific for the environment exists
+                    properties.load(stageSpecific);
+                }
             }
         }
         return properties;
