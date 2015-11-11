@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
  *
  * Per default the external source is only the system properties. However
  * by using the {@link ResourceBundle} annotation on the enclosing test,
- * custom resource locations can be defined. See {@link EnvironmentTest}
- * for a running example.
+ * custom resource locations can be defined. See <code>EnvironmentTest</code>
+ * in test sources for a running example.
  *
  * This annotation only works if the {@link EnvironmentTestRunner} is used.
  *
