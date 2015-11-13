@@ -38,7 +38,9 @@ If furthermore the publication parameter was set, also the ``/<stage>/<publicati
 Take a look at the ``HaoEnvironmentTest``. Here we not only test with the ``dev`` stage, but also with a special publication called ``hao``.
 ###System Properties
 A second way for applying settings is the system properties from command line directly. This is useful for integrating the tests in jenkins for example. By this mechanism also the environment is given.
-###Gradle Konfiguration
+###Multiple Publications
+Note that it is possible to set a comma-separated list of publications. In that case, the test runner will execute each test method for all of the applications included.
+##Gradle Configuration
 Take care, if you're using grade, that way is not working directly. By default gradle is not applying the jvm system properties to the gradle vm.
 If you start your tests with gradle you have to extent your ``build.gradle`` by something like this:
 ```gradle
